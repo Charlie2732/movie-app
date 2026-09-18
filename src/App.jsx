@@ -45,15 +45,17 @@ function App() {
   const [movies, setMovies] = useState([])
   const [title, setTitle] = useState('')
   const [file, setFile] = useState(null)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     fetch(API_URL)
       .then(res => res.json())
       .then(data => setMovies(data))
-      .catch(err => console.error('Kunde inte hämta filmer:', err))
+      .catch(() => setError('Kunde inte hämta filmer. Kontrollera att servern kör.'))
   }, [])
 
   function addMovie(title, file) {
+    setError(null)
     fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -75,16 +77,18 @@ function App() {
           setMovies([...movies, newMovie])
         }
       })
-      .catch(err => console.error('Kunde inte lägga till film:', err))
+      .catch(() => setError('Kunde inte lägga till filmen. Försök igen.'))
   }
 
   function removeMovie(id) {
+    setError(null)
     fetch(`${API_URL}/${id}`, { method: 'DELETE' })
       .then(() => setMovies(movies.filter(movie => movie.id !== id)))
-      .catch(err => console.error('Kunde inte ta bort film:', err))
+      .catch(() => setError('Kunde inte ta bort filmen. Försök igen.'))
   }
 
   function updateMovie(id, newTitle) {
+    setError(null)
     fetch(`${API_URL}/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -95,7 +99,7 @@ function App() {
           movie.id === id ? { ...movie, title: newTitle } : movie
         ))
       })
-      .catch(err => console.error('Kunde inte uppdatera film:', err))
+      .catch(() => setError('Kunde inte uppdatera filmen. Försök igen.'))
   }
 
   return (
@@ -109,6 +113,18 @@ function App() {
       boxSizing: "border-box",
     }}>
       <ToggleSwitch />
+
+      {error && (
+        <div style={{
+          background: "#d9534f",
+          color: "white",
+          padding: "12px 20px",
+          textAlign: "center",
+          fontWeight: "bold",
+        }}>
+          {error}
+        </div>
+      )}
 
       <div className="movie-form">
         <input
