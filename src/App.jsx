@@ -69,6 +69,20 @@ function App() {
       .catch(err => console.error('Kunde inte ta bort film:', err))
   }
 
+  function updateMovie(id, newTitle) {
+    fetch(`${API_URL}/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, title: newTitle }),
+    })
+      .then(() => {
+        setMovies(movies.map(movie =>
+          movie.id === id ? { ...movie, title: newTitle } : movie
+        ))
+      })
+      .catch(err => console.error('Kunde inte uppdatera film:', err))
+  }
+
   return (
     <div style={{
       backgroundImage: `url(${neonBg})`,
@@ -90,7 +104,7 @@ function App() {
         <button onClick={() => { addMovie(title); setTitle(''); }}>Lägg till film</button>
       </div>
 
-      <MovieList movies={movies} onRemove={removeMovie} />
+      <MovieList movies={movies} onRemove={removeMovie} onUpdate={updateMovie} />
     </div>
   )
 }
