@@ -11,7 +11,9 @@ function Movie({ movie, onRemove, onUpdate }) {
 
     return (
         <li className="movie-card">
-            <img src={movie.imageUrl} alt={movie.title} width="120" />
+            {movie.imagePath && (
+                <img src={`http://localhost:5215${movie.imagePath}`} alt={movie.title} width="120" />
+            )}
             {isEditing ? (
                 <>
                     <input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} />

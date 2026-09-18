@@ -44,6 +44,7 @@ function ToggleSwitch() {
 function App() {
   const [movies, setMovies] = useState([])
   const [title, setTitle] = useState('')
+  const [file, setFile] = useState(null)
 
   useEffect(() => {
     fetch(API_URL)
@@ -52,14 +53,28 @@ function App() {
       .catch(err => console.error('Kunde inte hämta filmer:', err))
   }, [])
 
-  function addMovie(title) {
+  function addMovie(title, file) {
     fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ title }),
     })
       .then(res => res.json())
-      .then(newMovie => setMovies([...movies, newMovie]))
+      .then(newMovie => {
+        if (file) {
+          const formData = new FormData()
+          formData.append('file', file)
+
+          return fetch(`${API_URL}/${newMovie.id}/upload`, {
+            method: 'POST',
+            body: formData,
+          })
+            .then(res => res.json())
+            .then(updatedMovie => setMovies([...movies, updatedMovie]))
+        } else {
+          setMovies([...movies, newMovie])
+        }
+      })
       .catch(err => console.error('Kunde inte lägga till film:', err))
   }
 
@@ -101,7 +116,12 @@ function App() {
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Titel"
         />
-        <button onClick={() => { addMovie(title); setTitle(''); }}>Lägg till film</button>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => setFile(e.target.files[0])}
+        />
+        <button onClick={() => { addMovie(title, file); setTitle(''); setFile(null); }}>Lägg till film</button>
       </div>
 
       <MovieList movies={movies} onRemove={removeMovie} onUpdate={updateMovie} />
